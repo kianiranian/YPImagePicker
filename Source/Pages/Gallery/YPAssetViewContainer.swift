@@ -93,6 +93,8 @@ class YPAssetViewContainer: UIView {
         multipleSelectionButton.setImage(YPConfig.icons.multipleSelectionOffIcon, for: .normal)
         multipleSelectionButton.Bottom == zoomableView!.Bottom - 15
         
+        zoomableView?.fitImage(false)
+        
     }
     
     // MARK: - Square button
@@ -115,8 +117,9 @@ class YPAssetViewContainer: UIView {
             }
         }
         
-        let shouldFit = YPConfig.library.onlySquare ? true : shouldCropToSquare
-        zoomableView?.fitImage(shouldFit)
+//        let shouldFit = YPConfig.library.onlySquare ? true : shouldCropToSquare
+//        zoomableView?.fitImage(shouldFit)
+        zoomableView?.fitImage(false)
         zoomableView?.layoutSubviews()
     }
     
