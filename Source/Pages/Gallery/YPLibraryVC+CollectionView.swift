@@ -169,6 +169,12 @@ extension YPLibraryVC: UICollectionViewDelegate {
     }
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        selectItemAt(indexPath: indexPath)
+        
+    }
+    
+    public func selectItemAt(indexPath: IndexPath) {
         let previouslySelectedIndexPath = IndexPath(row: currentlySelectedIndex, section: 0)
         currentlySelectedIndex = indexPath.row
 
@@ -177,10 +183,10 @@ extension YPLibraryVC: UICollectionViewDelegate {
         
         // Only scroll cell to top if preview is hidden.
         if !panGestureHelper.isImageShown {
-            collectionView.scrollToItem(at: indexPath, at: .top, animated: true)
+            v.collectionView.scrollToItem(at: indexPath, at: .top, animated: true)
         }
         v.refreshImageCurtainAlpha()
-            
+        
         if multipleSelectionEnabled {
             let cellIsInTheSelectionPool = isInSelectionPool(indexPath: indexPath)
             let cellIsCurrentlySelected = previouslySelectedIndexPath.row == currentlySelectedIndex
@@ -191,8 +197,8 @@ extension YPLibraryVC: UICollectionViewDelegate {
             } else if isLimitExceeded == false {
                 addToSelection(indexPath: indexPath)
             }
-            collectionView.reloadItems(at: [indexPath])
-            collectionView.reloadItems(at: [previouslySelectedIndexPath])
+            v.collectionView.reloadItems(at: [indexPath])
+            v.collectionView.reloadItems(at: [previouslySelectedIndexPath])
         } else {
             selection.removeAll()
             addToSelection(indexPath: indexPath)
@@ -201,7 +207,7 @@ extension YPLibraryVC: UICollectionViewDelegate {
             // In the case where the previous cell was loaded from iCloud, a new image was fetched
             // which triggered photoLibraryDidChange() and reloadItems() which breaks selection.
             //
-            if let previousCell = collectionView.cellForItem(at: previouslySelectedIndexPath) as? YPLibraryViewCell {
+            if let previousCell = v.collectionView.cellForItem(at: previouslySelectedIndexPath) as? YPLibraryViewCell {
                 previousCell.isSelected = false
             }
         }

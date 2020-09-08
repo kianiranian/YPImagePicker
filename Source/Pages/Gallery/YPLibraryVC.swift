@@ -21,16 +21,18 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     internal let mediaManager = LibraryMediaManager()
     internal var latestImageTapped = ""
     internal let panGestureHelper = PanGestureHelper()
+    private var preSelectedIndex = 0
 
     // MARK: - Init
     
-    public required init(items: [YPMediaItem]?) {
+    public required init(items: [YPMediaItem]?, preSelectedIndex: Int = 0) {
+        self.preSelectedIndex = preSelectedIndex
         super.init(nibName: nil, bundle: nil)
         title = YPConfig.wordings.libraryTitle
     }
     
-    public convenience init() {
-        self.init(items: nil)
+    public convenience init(preSelectedIndex: Int) {
+        self.init(items: nil, preSelectedIndex: preSelectedIndex)
     }
     
     public required init?(coder aDecoder: NSCoder) {
@@ -55,7 +57,8 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         registerForLibraryChanges()
         panGestureHelper.registerForPanGesture(on: v)
         registerForTapOnPreview()
-        refreshMediaRequest()
+        refreshMediaRequest(index: preSelectedIndex)
+        print("=-=-=-=-=-=-", preSelectedIndex)
 
         v.assetViewContainer.multipleSelectionButton.isHidden = !(YPConfig.library.maxNumberOfItems > 1)
         v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningMaxItemsLimit,
@@ -86,6 +89,9 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         if YPConfig.library.defaultMultipleSelection || selection.count > 1 {
             showMultipleSelection()
         }
+        currentlySelectedIndex = preSelectedIndex
+        selectItemAt(indexPath: IndexPath(item: preSelectedIndex, section: 0))
+        v.collectionView.reloadData()
     }
     
     // MARK: - View Lifecycle
@@ -267,7 +273,8 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         }
     }
     
-    func refreshMediaRequest() {
+    func refreshMediaRequest(index: Int = 0) {
+        
         let options = buildPHFetchOptions()
         if let collection = mediaManager.collection {
             mediaManager.fetchResult = PHAsset.fetchAssets(in: collection, options: options)
@@ -275,14 +282,19 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             mediaManager.fetchResult = PHAsset.fetchAssets(with: options)
         }
         
-        if mediaManager.hasResultItems {
-            changeAsset(mediaManager.fetchResult[0])
+        if mediaManager.fetchResult.count > 0 {
+            var selectedIndex = index
+            if mediaManager.fetchResult.count <= index - 1 {
+                selectedIndex = 0
+            }
+            
+            changeAsset(mediaManager.fetchResult[selectedIndex])
             v.collectionView.reloadData()
-            v.collectionView.selectItem(at: IndexPath(row: 0, section: 0),
+            v.collectionView.selectItem(at: IndexPath(row: selectedIndex, section: 0),
                                              animated: false,
                                              scrollPosition: UICollectionView.ScrollPosition())
-            if !multipleSelectionEnabled && YPConfig.library.preSelectItemOnMultipleSelection {
-                addToSelection(indexPath: IndexPath(row: 0, section: 0))
+            if !multipleSelectionEnabled {
+                addToSelection(indexPath: IndexPath(row: selectedIndex, section: 0))
             }
         } else {
             delegate?.noPhotosForOptions()

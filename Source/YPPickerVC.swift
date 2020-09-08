@@ -44,9 +44,8 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     
     var capturedImage: UIImage?
     
-    open override func viewDidLoad() {
-        super.viewDidLoad()
-
+    init(preselectedItem: Int) {
+        super.init(nibName: nil, bundle: nil)
         view.backgroundColor = YPConfig.colors.safeAreaBackgroundColor
         
         delegate = self
@@ -58,7 +57,7 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         
         // Library
         if YPConfig.screens.contains(.library) {
-            libraryVC = YPLibraryVC()
+            libraryVC = YPLibraryVC(preSelectedIndex: preselectedItem)
             libraryVC?.delegate = self
         }
         
@@ -121,6 +120,10 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         
         YPHelper.changeBackButtonIcon(self)
         YPHelper.changeBackButtonTitle(self)
+    }
+    
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     open override func viewWillAppear(_ animated: Bool) {
